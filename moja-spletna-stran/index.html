@@ -388,78 +388,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Stili za error modal */
-        .error-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .error-modal-content {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            position: relative;
-            text-align: center;
-        }
-
-        .error-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            color: #f56565;
-        }
-
-        .error-modal h2 {
-            color: #f56565;
-            margin-bottom: 15px;
-        }
-
-        .error-modal p {
-            margin-bottom: 25px;
-            color: #475569;
-            line-height: 1.6;
-        }
-
-        .error-modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .error-modal-btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .error-modal-btn.primary {
-            background: linear-gradient(45deg, #4a6cf7, #6a11cb);
-            color: white;
-        }
-
-        .error-modal-btn.secondary {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        .error-modal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -486,15 +414,6 @@
             .modal-content {
                 padding: 30px 20px;
                 margin: 20px;
-            }
-            
-            .error-modal-content {
-                padding: 30px 20px;
-                margin: 20px;
-            }
-            
-            .error-modal-buttons {
-                flex-direction: column;
             }
         }
     </style>
@@ -691,20 +610,6 @@
         </div>
     </div>
 
-    <!-- Error Modal -->
-    <div id="errorModal" class="error-modal">
-        <div class="error-modal-content">
-            <div class="error-icon">⚠️</div>
-            <h2>Password Reset Link Expired</h2>
-            <p>The password reset link you used is either invalid or has expired. For security reasons, these links are only valid for a limited time.</p>
-            <p>Please request a new password reset link below.</p>
-            <div class="error-modal-buttons">
-                <button class="error-modal-btn primary" onclick="openForgotPasswordModal()">Request New Link</button>
-                <button class="error-modal-btn secondary" onclick="closeErrorModal()">Close</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // SUPABASE CONFIGURATION
         const supabaseUrl = 'https://mdvczbswbwbghschjthq.supabase.co';
@@ -750,23 +655,11 @@
             document.getElementById('newPasswordModal').style.display = 'none';
         }
 
-        function openErrorModal() {
-            closeAllModals();
-            document.getElementById('errorModal').style.display = 'flex';
-        }
-
-        function closeErrorModal() {
-            document.getElementById('errorModal').style.display = 'none';
-            // Clean URL after closing error modal
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
         function closeAllModals() {
             document.getElementById('signupModal').style.display = 'none';
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('forgotPasswordModal').style.display = 'none';
             document.getElementById('newPasswordModal').style.display = 'none';
-            document.getElementById('errorModal').style.display = 'none';
             clearMessages();
         }
 
@@ -789,24 +682,23 @@
 
         // Close modal when clicking outside
         window.onclick = function(event) {
-            if (event.target.classList.contains('modal') || event.target.classList.contains('error-modal')) {
+            if (event.target.classList.contains('modal')) {
                 closeAllModals();
             }
         }
 
-        // CHECK FOR PASSWORD RESET ERRORS
-        function checkForPasswordResetError() {
-            console.log('🔍 Checking for password reset errors...');
+        // FORCE PASSWORD RESET DETECTION
+        function forcePasswordResetDetection() {
+            console.log('🔍 FORCE DETECTION - Checking URL...');
             console.log('📍 Full URL:', window.location.href);
             console.log('📍 Hash:', window.location.hash);
-            console.log('📍 Search:', window.location.search);
             
-            // Check URL parameters for errors
+            // DODANO: Preveri za napake v URL-ju
             const urlParams = new URLSearchParams(window.location.search);
             const error = urlParams.get('error');
             const errorDescription = urlParams.get('error_description');
             
-            // Also check hash parameters
+            // Preveri tudi hash parametre za napake
             const hashParams = {};
             if (window.location.hash) {
                 window.location.hash.substring(1).split('&').forEach(pair => {
@@ -818,20 +710,23 @@
             const hashError = hashParams['error'];
             const hashErrorDescription = hashParams['error_description'];
             
-            // If we have an error about expired/invalid link
+            // Če imamo napako o poteklem/neveljavnem linku
             if (error === 'access_denied' || hashError === 'access_denied' || 
                 errorDescription?.includes('expired') || hashErrorDescription?.includes('expired') ||
                 errorDescription?.includes('invalid') || hashErrorDescription?.includes('invalid')) {
                 
                 console.log('❌ Password reset error detected:', error || hashError, errorDescription || hashErrorDescription);
                 
-                // Show error modal
+                // Prikaži napako v forgot password modal
                 setTimeout(() => {
-                    openErrorModal();
-                    console.log('🚨 Error modal opened');
+                    openForgotPasswordModal();
+                    showMessage('forgotPasswordMessage', 
+                        '❌ Your password reset link has expired or is invalid. Please request a new one below.', 
+                        'error'
+                    );
                 }, 500);
                 
-                // Clean URL
+                // Počisti URL
                 setTimeout(() => {
                     window.history.replaceState({}, document.title, window.location.pathname);
                     console.log('🧹 URL cleaned after error');
@@ -840,21 +735,7 @@
                 return true;
             }
             
-            return false;
-        }
-
-        // FORCE PASSWORD RESET DETECTION
-        function forcePasswordResetDetection() {
-            console.log('🔍 FORCE DETECTION - Checking URL...');
-            console.log('📍 Full URL:', window.location.href);
-            console.log('📍 Hash:', window.location.hash);
-            
-            // First check for errors
-            if (checkForPasswordResetError()) {
-                return false;
-            }
-            
-            // Then check for password reset
+            // Preveri hash za password reset
             if (window.location.hash && window.location.hash.includes('type=recovery')) {
                 console.log('🎯 FORCE DETECTION: Password reset URL detected!');
                 
@@ -1073,4 +954,62 @@
                     openLoginModal();
                 }, 3000);
                 
-            } catch
+            } catch (error) {
+                showMessage('newPasswordMessage', 
+                    'Error updating password: ' + error.message, 
+                    'error'
+                );
+            } finally {
+                newPasswordBtn.disabled = false;
+                newPasswordBtn.textContent = 'UPDATE PASSWORD';
+            }
+        });
+
+        // Check auth state and password reset on load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM loaded, checking for password reset...');
+            
+            // Check for password reset - TAKOJ
+            setTimeout(() => {
+                forcePasswordResetDetection();
+            }, 100);
+            
+            // Animation for feature cards
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+
+        // AVTOMATSKO PREVERJANJE - DODANO
+        window.addEventListener('hashchange', function() {
+            console.log('🔗 Hash changed, checking for password reset...');
+            setTimeout(() => {
+                forcePasswordResetDetection();
+            }, 100);
+        });
+
+        // Preveri takoj ko se stran naloži (še preden je DOM ready)
+        console.log('📄 Script loaded, checking URL immediately...');
+        setTimeout(() => {
+            forcePasswordResetDetection();
+        }, 50);
+
+        // Auth state listener - POPRAVLJEN
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('🔐 Auth state changed:', event);
+            
+            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+                console.log('🔄 Auth event that might be password reset:', event);
+                // Vedno preveri za password reset
+                setTimeout(() => {
+                    forcePasswordResetDetection();
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
