@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
+        /* Tvoj CSS ostane enak */
         * {
             margin: 0;
             padding: 0;
@@ -687,15 +688,24 @@
         }
     }
 
-    // IMPROVED PASSWORD RESET DETECTION
+    // FIXED PASSWORD RESET DETECTION
     function handlePasswordReset() {
         console.log('=== PASSWORD RESET CHECK ===');
         console.log('Full URL:', window.location.href);
         console.log('Hash:', window.location.hash);
         
-        // Check for valid password reset URL
+        // Preveri ali smo že obdelali password reset (prepreči ponavljanje)
+        if (sessionStorage.getItem('password_reset_handled') === 'true') {
+            console.log('Password reset already handled, skipping...');
+            return false;
+        }
+        
+        // Scenario 1: Veljaven password reset URL
         if (window.location.hash && window.location.hash.includes('type=recovery')) {
-            console.log('🎯 VALID PASSWORD RESET DETECTED - OPENING NEW PASSWORD MODAL');
+            console.log('🎯 VALID PASSWORD RESET DETECTED');
+            
+            // Označi kot obdelano
+            sessionStorage.setItem('password_reset_handled', 'true');
             
             // Parse hash parameters
             const hashParams = {};
@@ -710,11 +720,11 @@
                 console.log('Token stored:', access_token);
             }
             
-            // Open new password modal
+            // Odpri modal takoj
+            console.log('Opening new password modal...');
             openNewPasswordModal();
-            console.log('New password modal opened');
             
-            // Clean URL
+            // Počisti URL
             setTimeout(() => {
                 window.history.replaceState({}, document.title, window.location.pathname);
                 console.log('URL cleaned');
@@ -723,19 +733,21 @@
             return true;
         }
         
-        // Check for expired/invalid password reset link
+        // Scenario 2: Potekel password reset URL
         if (window.location.hash && window.location.hash.includes('error=access_denied')) {
-            console.log('❌ EXPIRED PASSWORD RESET LINK DETECTED - OPENING FORGOT PASSWORD MODAL');
+            console.log('❌ EXPIRED PASSWORD RESET LINK DETECTED');
             
-            // Open forgot password modal with error message
+            // Označi kot obdelano
+            sessionStorage.setItem('password_reset_handled', 'true');
+            
+            // Odpri forgot password modal z napako
             openForgotPasswordModal();
             showMessage('forgotPasswordMessage', 
                 '❌ Your password reset link has expired or is invalid. Please request a new one below.', 
                 'error'
             );
-            console.log('Forgot password modal opened with error message');
             
-            // Clean URL
+            // Počisti URL
             setTimeout(() => {
                 window.history.replaceState({}, document.title, window.location.pathname);
                 console.log('URL cleaned after error');
@@ -761,7 +773,6 @@
         signupBtn.textContent = 'Creating Account...';
         
         try {
-            // Create user in Supabase with email verification
             const { data, error } = await supabase.auth.signUp({
                 email: email,
                 password: password,
@@ -923,8 +934,9 @@
                 'success'
             );
             
-            // Clear stored token
+            // Počisti stored token in flag
             sessionStorage.removeItem('reset_token');
+            sessionStorage.removeItem('password_reset_handled');
             document.getElementById('newPasswordForm').reset();
             
             setTimeout(() => {
@@ -943,32 +955,37 @@
         }
     });
 
-    // MULTIPLE CHECKS FOR PASSWORD RESET
+    // PASSWORD RESET CHECK - IMPROVED
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 DOM loaded - checking password reset');
+        // Počisti prejšnji flag ob novem load
+        sessionStorage.removeItem('password_reset_handled');
         handlePasswordReset();
     });
 
-    window.addEventListener('load', function() {
-        console.log('📄 Page loaded - checking password reset');
-        handlePasswordReset();
-    });
-
-    // Check multiple times to be sure
+    // Check multiple times
     setTimeout(handlePasswordReset, 100);
     setTimeout(handlePasswordReset, 500);
     setTimeout(handlePasswordReset, 1000);
-    setTimeout(handlePasswordReset, 2000);
 
     // Check on hash change
     window.addEventListener('hashchange', function() {
         console.log('🔗 Hash changed - checking password reset');
+        // Počisti flag ob hash spremembi
+        sessionStorage.removeItem('password_reset_handled');
         handlePasswordReset();
     });
 
-    // Auth state listener
+    // Auth state listener - IGNORE SIGNED_IN events during password reset
     supabase.auth.onAuthStateChange((event, session) => {
         console.log('🔐 Auth state changed:', event);
+        
+        // Ignore SIGNED_IN events if we're handling password reset
+        if (event === 'SIGNED_IN' && sessionStorage.getItem('password_reset_handled') === 'true') {
+            console.log('Ignoring SIGNED_IN event during password reset flow');
+            return;
+        }
+        
         if (event === 'PASSWORD_RECOVERY') {
             console.log('🔄 Password recovery event - checking again');
             setTimeout(handlePasswordReset, 100);
