@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowStack - Modern Income Education</title>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+
     <style>
         * {
             margin: 0;
@@ -214,11 +214,12 @@
     </style>
 </head>
 <body>
+
     <div class="container">
         <div class="logo">🚀</div>
         <h1>FlowStack</h1>
         <p class="subtitle">Modern Education for Digital Income</p>
-        
+
         <div class="value-box">
             <h2>Learn High-Income Digital Skills</h2>
             <p>Stop trading time for money. Build scalable income streams with in-demand digital skills.</p>
@@ -248,7 +249,7 @@
         </footer>
     </div>
 
-    <!-- MODALS -->
+    <!-- SIGNUP MODAL -->
     <div id="signupModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeSignupModal()">&times;</span>
@@ -274,6 +275,7 @@
         </div>
     </div>
 
+    <!-- LOGIN MODAL -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeLoginModal()">&times;</span>
@@ -298,6 +300,7 @@
         </div>
     </div>
 
+    <!-- FORGOT PASSWORD MODAL -->
     <div id="forgotPasswordModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeForgotPasswordModal()">&times;</span>
@@ -315,6 +318,7 @@
         </div>
     </div>
 
+    <!-- NEW PASSWORD MODAL -->
     <div id="newPasswordModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeNewPasswordModal()">&times;</span>
@@ -334,180 +338,135 @@
     </div>
 
     <script>
-        console.log("🟢 FlowStack script starting...");
+        console.log("🟢 FlowStack script loaded");
 
-        // SUPABASE
+        // Supabase init
         const supabaseUrl = 'https://mdvczbswbwbghschjthq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kdmN6YnN3YndiZ2hzY2hqdGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxOTcwNzIsImV4cCI6MjA3ODc3MzA3Mn0.LhiKgP0EWAANGJK7ocN8rbTBmEFttgTsCqwEzHzbezk';
+        const supabaseKey = 'YOUR_PUBLIC_KEY';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // MODAL FUNCTIONS
-        function openSignupModal() { 
-            console.log("🟢 Opening signup modal");
-            closeAllModals(); 
-            document.getElementById('signupModal').style.display = 'flex'; 
-        }
-        function closeSignupModal() { 
-            document.getElementById('signupModal').style.display = 'none'; 
-        }
-        function openLoginModal() { 
-            closeAllModals(); 
-            document.getElementById('loginModal').style.display = 'flex'; 
-        }
-        function closeLoginModal() { 
-            document.getElementById('loginModal').style.display = 'none'; 
-        }
-        function openForgotPasswordModal() { 
-            closeAllModals(); 
-            document.getElementById('forgotPasswordModal').style.display = 'flex'; 
-        }
-        function closeForgotPasswordModal() { 
-            document.getElementById('forgotPasswordModal').style.display = 'none'; 
-        }
-        function openNewPasswordModal() { 
-            console.log("🟢 OPENING NEW PASSWORD MODAL - PASSWORD RESET DETECTED");
-            closeAllModals(); 
-            document.getElementById('newPasswordModal').style.display = 'flex'; 
-        }
-        function closeNewPasswordModal() { 
-            document.getElementById('newPasswordModal').style.display = 'none'; 
-        }
+        // ---------- MODAL CONTROLS ----------
+        function openSignupModal() { closeAllModals(); signupModal.style.display = "flex"; }
+        function closeSignupModal() { signupModal.style.display = "none"; }
+        function openLoginModal() { closeAllModals(); loginModal.style.display = "flex"; }
+        function closeLoginModal() { loginModal.style.display = "none"; }
+        function openForgotPasswordModal() { closeAllModals(); forgotPasswordModal.style.display = "flex"; }
+        function closeForgotPasswordModal() { forgotPasswordModal.style.display = "none"; }
+        function openNewPasswordModal() { closeAllModals(); newPasswordModal.style.display = "flex"; }
+        function closeNewPasswordModal() { newPasswordModal.style.display = "none"; }
+
         function closeAllModals() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.style.display = 'none';
-            });
+            document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
         }
 
-        // IMPROVED PASSWORD RESET DETECTION
+        // ---------- PASSWORD RESET DETECTION ----------
         function checkPasswordReset() {
             const hash = window.location.hash;
-            console.log('🔍 Checking URL hash:', hash);
-            
-            if (hash.includes('type=recovery')) {
-                console.log('🎯 SUCCESS: Password reset link detected! Opening modal...');
+            console.log("Hash:", hash);
+
+            if (/type=recovery/i.test(hash)) {
+                console.log("🎯 Recovery link detected!");
                 openNewPasswordModal();
-                // Takoj počisti URL
+
                 setTimeout(() => {
-                    window.history.replaceState({}, '', window.location.pathname);
-                    console.log('✅ URL cleaned');
-                }, 100);
+                    window.history.replaceState({}, "", window.location.pathname);
+                }, 200);
+
                 return true;
             }
-            
-            if (hash.includes('error=access_denied')) {
-                console.log('❌ EXPIRED LINK DETECTED');
+
+            if (/error=access_denied/i.test(hash)) {
+                console.log("❌ Expired recovery link!");
                 openForgotPasswordModal();
+
                 setTimeout(() => {
-                    window.history.replaceState({}, '', window.location.pathname);
-                }, 100);
+                    window.history.replaceState({}, "", window.location.pathname);
+                }, 200);
+
                 return true;
             }
-            
-            console.log('ℹ️ No password reset detected');
+
             return false;
         }
 
-        // EVENT LISTENERS
-        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        // Call detection at multiple times
+        checkPasswordReset();
+        setTimeout(checkPasswordReset, 100);
+        setTimeout(checkPasswordReset, 500);
+        setTimeout(checkPasswordReset, 1500);
+
+        window.addEventListener("hashchange", checkPasswordReset);
+        window.addEventListener("load", checkPasswordReset);
+
+        // ---------- AUTH HANDLERS ----------
+        signupForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
+
+            const email = emailInput.value;
+            const pass = password.value;
+
             const { error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: { emailRedirectTo: 'https://flowstackai.github.io/' }
+                email,
+                password: pass,
+                options: { emailRedirectTo: "https://flowstackai.github.io/index.html" }
             });
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('Account created! Check your email for verification.');
+
+            if (error) alert(error.message);
+            else {
+                alert("Account created — check your email!");
                 closeSignupModal();
             }
         });
 
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('Login successful!');
+
+            const { error } = await supabase.auth.signInWithPassword({
+                email: loginEmail.value,
+                password: loginPassword.value,
+            });
+
+            if (error) alert(error.message);
+            else {
+                alert("Logged in!");
                 closeLoginModal();
             }
         });
 
-        document.getElementById('forgotPasswordForm').addEventListener('submit', async function(e) {
+        forgotPasswordForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const email = document.getElementById('forgotEmail').value;
-            
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://flowstackai.github.io/'
-            });
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('Password reset link sent! Check your email.');
+
+            const { error } = await supabase.auth.resetPasswordForEmail(
+                forgotEmail.value,
+                { redirectTo: "https://flowstackai.github.io/index.html" }
+            );
+
+            if (error) alert(error.message);
+            else {
+                alert("Reset link sent — check your email!");
                 closeForgotPasswordModal();
             }
         });
 
-        document.getElementById('newPasswordForm').addEventListener('submit', async function(e) {
+        newPasswordForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (newPassword !== confirmPassword) {
-                alert('Passwords do not match!');
-                return;
-            }
-            
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('Password updated successfully!');
+
+            const newPass = newPassword.value;
+            const confirm = confirmPassword.value;
+
+            if (newPass !== confirm)
+                return alert("Passwords do not match!");
+
+            const { error } = await supabase.auth.updateUser({ password: newPass });
+
+            if (error) alert(error.message);
+            else {
+                alert("Password updated successfully!");
                 closeNewPasswordModal();
                 openLoginModal();
             }
         });
-
-        // INIT
-        window.addEventListener('click', function(e) {
-            if (e.target.classList.contains('modal')) {
-                closeAllModals();
-            }
-        });
-
-        // ULTIMATE PASSWORD RESET DETECTION
-        console.log('🔍 Starting ULTIMATE password reset detection...');
-        
-        // Check immediately and multiple times
-        checkPasswordReset();
-        setTimeout(checkPasswordReset, 50);
-        setTimeout(checkPasswordReset, 100);
-        setTimeout(checkPasswordReset, 200);
-        setTimeout(checkPasswordReset, 500);
-        setTimeout(checkPasswordReset, 1000);
-        setTimeout(checkPasswordReset, 2000);
-
-        // Check on every URL change
-        window.addEventListener('hashchange', function() {
-            console.log('🔗 Hash changed, checking password reset...');
-            checkPasswordReset();
-        });
-
-        // Also check when page fully loads
-        window.addEventListener('load', checkPasswordReset);
-
-        console.log('✅ FlowStack fully loaded!');
     </script>
+
 </body>
 </html>
