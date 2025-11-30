@@ -334,6 +334,8 @@
     </div>
 
     <script>
+        console.log("🟢 FlowStack script starting...");
+
         // SUPABASE
         const supabaseUrl = 'https://mdvczbswbwbghschjthq.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kdmN6YnN3YndiZ2hzY2hqdGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxOTcwNzIsImV4cCI6MjA3ODc3MzA3Mn0.LhiKgP0EWAANGJK7ocN8rbTBmEFttgTsCqwEzHzbezk';
@@ -341,6 +343,7 @@
 
         // MODAL FUNCTIONS
         function openSignupModal() { 
+            console.log("🟢 Opening signup modal");
             closeAllModals(); 
             document.getElementById('signupModal').style.display = 'flex'; 
         }
@@ -362,6 +365,7 @@
             document.getElementById('forgotPasswordModal').style.display = 'none'; 
         }
         function openNewPasswordModal() { 
+            console.log("🟢 OPENING NEW PASSWORD MODAL - PASSWORD RESET DETECTED");
             closeAllModals(); 
             document.getElementById('newPasswordModal').style.display = 'flex'; 
         }
@@ -374,20 +378,32 @@
             });
         }
 
-        // PASSWORD RESET DETECTION
+        // IMPROVED PASSWORD RESET DETECTION
         function checkPasswordReset() {
-            if (window.location.hash.includes('type=recovery')) {
-                console.log('Password reset detected!');
+            const hash = window.location.hash;
+            console.log('🔍 Checking URL hash:', hash);
+            
+            if (hash.includes('type=recovery')) {
+                console.log('🎯 SUCCESS: Password reset link detected! Opening modal...');
                 openNewPasswordModal();
-                window.history.replaceState({}, '', window.location.pathname);
+                // Takoj počisti URL
+                setTimeout(() => {
+                    window.history.replaceState({}, '', window.location.pathname);
+                    console.log('✅ URL cleaned');
+                }, 100);
                 return true;
             }
-            if (window.location.hash.includes('error=access_denied')) {
-                console.log('Expired password reset link');
+            
+            if (hash.includes('error=access_denied')) {
+                console.log('❌ EXPIRED LINK DETECTED');
                 openForgotPasswordModal();
-                window.history.replaceState({}, '', window.location.pathname);
+                setTimeout(() => {
+                    window.history.replaceState({}, '', window.location.pathname);
+                }, 100);
                 return true;
             }
+            
+            console.log('ℹ️ No password reset detected');
             return false;
         }
 
@@ -470,12 +486,28 @@
             }
         });
 
-        // Check for password reset on load
+        // ULTIMATE PASSWORD RESET DETECTION
+        console.log('🔍 Starting ULTIMATE password reset detection...');
+        
+        // Check immediately and multiple times
+        checkPasswordReset();
+        setTimeout(checkPasswordReset, 50);
         setTimeout(checkPasswordReset, 100);
+        setTimeout(checkPasswordReset, 200);
         setTimeout(checkPasswordReset, 500);
-        window.addEventListener('hashchange', checkPasswordReset);
+        setTimeout(checkPasswordReset, 1000);
+        setTimeout(checkPasswordReset, 2000);
 
-        console.log('FlowStack loaded successfully!');
+        // Check on every URL change
+        window.addEventListener('hashchange', function() {
+            console.log('🔗 Hash changed, checking password reset...');
+            checkPasswordReset();
+        });
+
+        // Also check when page fully loads
+        window.addEventListener('load', checkPasswordReset);
+
+        console.log('✅ FlowStack fully loaded!');
     </script>
 </body>
 </html>
