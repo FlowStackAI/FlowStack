@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FlowStack</title>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a6cf7;
+            text-decoration: none;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #f8f9fa;
+            border-color: #ccc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        h1 { margin-top: 0; color: #333; }
+        h2 { color: #444; font-size: 1.25rem; }
+        p { color: #666; line-height: 1.6; }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">Loading...</div>
+
+    <nav class="navbar" style="display: none;" id="navbar">
+        <a href="#" class="logo">FlowStack</a>
+        <div class="user-menu">
+            <span id="userEmail"></span>
+            <button onclick="handleLogout()" class="logout-btn">Log Out</button>
+        </div>
+    </nav>
+
+    <div class="container" style="display: none;" id="content">
+        <div class="welcome-card">
+            <h1 id="welcomeMessage">Welcome back!</h1>
+            <p>You have successfully logged into the FlowStack platform.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>My Courses</h2>
+                <p>You haven't enrolled in any courses yet.</p>
+            </div>
+            <div class="card">
+                <h2>Account Settings</h2>
+                <p>Manage your password and profile details here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Config
+        const supabaseUrl = 'https://mdvczbswbwbghschjthq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kdmN6YnN3YndiZ2hzY2hqdGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxOTcwNzIsImV4cCI6MjA3ODc3MzA3Mn0.LhiKgP0EWAANGJK7ocN8rbTBmEFttgTsCqwEzHzbezk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Check Authentication
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Update UI
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('navbar').style.display = 'flex';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('userEmail').textContent = session.user.email;
+            
+            if (session.user.user_metadata?.full_name) {
+                document.getElementById('welcomeMessage').textContent = `Welcome, ${session.user.user_metadata.full_name}!`;
+            }
+        }
+
+        // Logout Handler
+        async function handleLogout() {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Init
+        checkAuth();
+
+        // Listen for auth changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
