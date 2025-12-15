@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Player - FlowStack</title>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1b3a 0%, #1e3a8a 50%, #0f1b3a 100%);
+            color: #333333;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.05;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s;
+        }
+
+        .back-btn:hover {
+            color: white;
+        }
+
+        /* Course Container */
+        .course-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            height: calc(100vh - 100px);
+        }
+
+        /* Main Content (Video) */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .video-player-wrapper {
+            width: 100%;
+            position: relative;
+            padding-top: 56.25%;
+            /* 16:9 Aspect Ratio */
+            background: black;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .video-player-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: rgba(255, 255, 255, 0.5);
+            background: #000;
+        }
+
+        .play-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .lesson-info {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lesson-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background-image: linear-gradient(45deg, #4a6cf7, #6a11cb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-desc {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        /* Sidebar (Syllabus) */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h3 {
+            font-size: 1.2rem;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a6cf7, #6a11cb);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modules-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .module {
+            margin-bottom: 15px;
+        }
+
+        .module-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #888;
+            letter-spacing: 1px;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 10px;
+        }
+
+        .lesson-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lesson-item.active {
+            background: rgba(74, 108, 247, 0.2);
+            border-left: 3px solid #4a6cf7;
+        }
+
+        .lesson-icon {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .lesson-item.completed .lesson-icon {
+            color: #10b981;
+        }
+
+        .lesson-item.active .lesson-icon {
+            color: #4a6cf7;
+        }
+
+        .lesson-name {
+            font-size: 0.95rem;
+            color: #e2e8f0;
+            flex: 1;
+        }
+
+        .lesson-duration {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 900px) {
+            .course-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                padding-bottom: 40px;
+            }
+
+            .sidebar {
+                height: 500px;
+            }
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0f1b3a 0%, #1e3a8a 50%, #0f1b3a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            z-index: 1000;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading" class="loading">Loading Course...</div>
+
+    <div class="video-background">
+        <video autoplay muted loop>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-white-flowers-1586-large.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="dashboard.html" class="logo">🚀 FlowStack</a>
+            <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+        <div style="font-weight: bold; opacity: 0.8;" id="courseTitleHeader">Course Title</div>
+        <div>
+            <!-- User avatar or simple logout could go here -->
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="course-container">
+        <!-- Main Area -->
+        <div class="main-content">
+            <div class="video-player-wrapper">
+                <!-- <iframe id="videoPlayer" src="" allowfullscreen></iframe> -->
+                <div id="videoPlaceholder" class="video-placeholder">
+                    <div class="play-icon">▶</div>
+                    <h3>Select a lesson to start</h3>
+                </div>
+                <iframe id="videoFrame" style="display:none;" width="100%" height="100%" src="" title="Video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            <div class="lesson-info">
+                <h1 id="lessonTitle" class="lesson-title">Welcome to the Course</h1>
+                <p id="lessonDescription" class="lesson-desc">Select a lesson from the sidebar to begin your learning
+                    journey.</p>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Course Content</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span>0% Complete</span>
+                    <span id="progressFraction">0/0</span>
+                </div>
+            </div>
+
+            <div class="modules-list" id="modulesList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- COURSE DATA ---
+        // Ideally this comes from a database, but we'll structure it here for the "First Course" (SaaS)
+
+        const courses = {
+            'saas': {
+                title: 'SaaS Builder Masterclass',
+                modules: [
+                    {
+                        title: 'Module 1: Foundations',
+                        lessons: [
+                            { id: 's1-l1', title: 'What is SaaS?', duration: '5:20', videoId: 'dQw4w9WgXcQ', desc: 'Understanding the business model of Software as a Service.' }, // Rick Roll as placeholder :)
+                            { id: 's1-l2', title: 'Finding a Micro-SaaS Idea', duration: '8:45', videoId: 'dQw4w9WgXcQ', desc: 'How to find profitable niches that are not saturated.' },
+                            { id: 's1-l3', title: 'Validating Your Idea', duration: '12:10', videoId: 'dQw4w9WgXcQ', desc: 'Confirming people will pay before you build.' }
+                        ]
+                    },
+                    {
+                        title: 'Module 2: Building MVP',
+                        lessons: [
+                            { id: 's2-l1', title: 'No-Code vs Code', duration: '15:00', videoId: 'dQw4w9WgXcQ', desc: 'Choosing the right tech stack for your skills.' },
+                            { id: 's2-l2', title: 'Design Basics (UI/UX)', duration: '10:30', videoId: 'dQw4w9WgXcQ', desc: 'Making your app look professional and trustworthy.' },
+                            { id: 's2-l3', title: 'Database Structure', duration: '20:15', videoId: 'dQw4w9WgXcQ', desc: 'How to organize your data.' }
+                        ]
+                    },
+                    {
+                        title: 'Module 3: Launch & Scale',
+                        lessons: [
+                            { id: 's3-l1', title: 'The Launch Checklist', duration: '6:45', videoId: 'dQw4w9WgXcQ', desc: 'Don\'t miss these critical steps before going live.' },
+                            { id: 's3-l2', title: 'Getting Your First 10 Users', duration: '14:20', videoId: 'dQw4w9WgXcQ', desc: 'Cold outreach and content marketing strategies.' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // --- STATE ---
+        let currentCourseId = 'saas'; // Default
+        let currentLessonId = null;
+        let completedLessons = []; // In a real app, load from DB
+
+        // --- SUBAPSE AUTH ---
+        const supabaseUrl = 'https://mdvczbswbwbghschjthq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kdmN6YnN3YndiZ2hzY2hqdGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxOTcwNzIsImV4cCI6MjA3ODc3MzA3Mn0.LhiKgP0EWAANGJK7ocN8rbTBmEFttgTsCqwEzHzbezk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function init() {
+            // Check Auth
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+
+            // Get Course ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const pathParam = urlParams.get('path');
+            if (pathParam && courses[pathParam]) {
+                currentCourseId = pathParam;
+            }
+
+            // Render Course
+            renderCourse(currentCourseId);
+        }
+
+        function renderCourse(courseId) {
+            const course = courses[courseId];
+            if (!course) return; // Handle error or show default
+
+            document.getElementById('courseTitleHeader').textContent = course.title;
+            const modulesList = document.getElementById('modulesList');
+            modulesList.innerHTML = '';
+
+            let totalLessons = 0;
+
+            course.modules.forEach(mod => {
+                const modDiv = document.createElement('div');
+                modDiv.className = 'module';
+
+                const modTitle = document.createElement('div');
+                modTitle.className = 'module-title';
+                modTitle.textContent = mod.title;
+                modDiv.appendChild(modTitle);
+
+                mod.lessons.forEach(lesson => {
+                    totalLessons++;
+                    const lessonDiv = document.createElement('div');
+                    lessonDiv.className = 'lesson-item';
+                    lessonDiv.id = `lesson-${lesson.id}`;
+                    lessonDiv.onclick = () => loadLesson(lesson);
+
+                    // Icon
+                    const icon = document.createElement('span');
+                    icon.className = 'lesson-icon';
+                    icon.innerHTML = '▶'; // Play icon default
+
+                    // Title
+                    const name = document.createElement('div');
+                    name.className = 'lesson-name';
+                    name.textContent = lesson.title;
+
+                    // Duration
+                    const dur = document.createElement('div');
+                    dur.className = 'lesson-duration';
+                    dur.textContent = lesson.duration;
+
+                    lessonDiv.appendChild(icon);
+                    lessonDiv.appendChild(name);
+                    lessonDiv.appendChild(dur);
+                    modDiv.appendChild(lessonDiv);
+                });
+
+                modulesList.appendChild(modDiv);
+            });
+
+            updateProgress(totalLessons);
+        }
+
+        function loadLesson(lesson) {
+            currentLessonId = lesson.id;
+
+            // Update UI Active State
+            document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`lesson-${lesson.id}`).classList.add('active');
+
+            // Update Text
+            document.getElementById('lessonTitle').textContent = lesson.title;
+            document.getElementById('lessonDescription').textContent = lesson.desc;
+
+            // Update Video
+            // Using YouTube embed for the placeholder videoId
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
+            const videoFrame = document.getElementById('videoFrame');
+
+            videoPlaceholder.style.display = 'none';
+            videoFrame.style.display = 'block';
+            videoFrame.src = `https://www.youtube.com/embed/${lesson.videoId}?autoplay=1`;
+
+            // Mark as complete (simulation)
+            if (!completedLessons.includes(lesson.id)) {
+                completedLessons.push(lesson.id);
+                // Update icon to checkmark
+                const icon = document.querySelector(`#lesson-${lesson.id} .lesson-icon`);
+                icon.textContent = '✓';
+                document.getElementById(`lesson-${lesson.id}`).classList.add('completed');
+
+                // Update progress bar
+                // Recalculate based on total lessons in DOM
+                const total = document.querySelectorAll('.lesson-item').length;
+                updateProgress(total);
+            }
+        }
+
+        function updateProgress(total) {
+            const completed = completedLessons.length;
+            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            document.querySelector('.progress-bar-fill').style.width = `${percentage}%`;
+            document.querySelector('.progress-text').innerHTML = `
+                <span>${percentage}% Complete</span>
+                <span>${completed}/${total}</span>
+             `;
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+
+</html>
