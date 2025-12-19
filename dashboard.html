@@ -677,10 +677,12 @@
         function showView(viewName) {
             // Hide all views
             ['dashboard', 'ai-chat', 'settings'].forEach(v => {
-                document.getElementById('view-' + v).style.display = 'none';
+                const view = document.getElementById('view-' + v);
+                if (view) view.style.display = 'none';
             });
             // Show requested view
-            document.getElementById('view-' + viewName).style.display = viewName === 'ai-chat' ? 'flex' : 'block';
+            const targetView = document.getElementById('view-' + viewName);
+            if (targetView) targetView.style.display = viewName === 'ai-chat' ? 'flex' : 'block';
 
             // Update active state in nav
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -691,7 +693,8 @@
             });
 
             // Close dropdown if open
-            document.getElementById('userDropdown').classList.remove('show');
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) dropdown.classList.remove('show');
         }
 
         function toggleUserDropdown() {
@@ -1060,23 +1063,27 @@
         }
 
         function renderGrid() {
-            const grid = document.getElementById('pathsGrid');
-            grid.innerHTML = ''; // Clear existing
+            const grid = document.getElementById('coursesGrid');
+            if (!grid) {
+                console.error("coursesGrid element not found!");
+                return;
+            }
+            grid.innerHTML = '';
 
             const data = contentData[currentLang] || contentData['en'];
             const t = translations[currentLang] || translations['en'];
 
-            data.forEach(path => {
+            data.forEach((path, index) => {
                 const card = document.createElement('div');
-                card.className = 'path-card';
+                card.className = `course-card ${index === 0 ? 'active' : ''}`;
                 card.onclick = () => openDetails(path);
                 card.innerHTML = `
-                    <div>
-                        <span class="path-icon">${path.icon}</span>
-                        <h2 class="path-title">${path.title}</h2>
-                        <p class="path-desc">${path.shortDesc}</p>
-                    </div>
-                    <button class="learn-more-btn">${t.explore_btn}</button>
+                    <div class="course-title">${path.title}</div>
+                    <div class="course-meta">${path.shortDesc}</div>
+                    ${index === 0 ? `
+                    <div class="progress-bar-mini" style="height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 10px; position: relative;">
+                        <div style="width: 11%; height: 100%; background: var(--primary-color); border-radius: 2px;"></div>
+                    </div>` : ''}
                 `;
                 grid.appendChild(card);
             });
@@ -1084,7 +1091,18 @@
 
         function openDetails(path) {
             const overlay = document.getElementById('detailsOverlay');
+            // Add content if it doesn't exist
+            if (!overlay.innerHTML) {
+                overlay.innerHTML = `
+                    <div class="details-content">
+                        <span class="close-details" onclick="closeDetails()">&times;</span>
+                        <div id="detailContent"></div>
+                    </div>
+                `;
+            }
             const content = document.getElementById('detailContent');
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
             const t = translations[currentLang] || translations['en'];
             const pData = packagesData[currentLang] || packagesData['en'];
 
@@ -1185,13 +1203,16 @@
             document.getElementById('mainContent').style.display = 'block';
 
             const email = session.user.email;
-            document.getElementById('userEmailDisplay').textContent = email;
-            document.getElementById('settingsEmail').value = email;
-
-            // Extract name from email as placeholder
             const name = email.split('@')[0];
-            document.getElementById('userNameDisplay').textContent = name.charAt(0).toUpperCase() + name.slice(1);
-            document.getElementById('settingsName').value = name.charAt(0).toUpperCase() + name.slice(1);
+            const nameDisplay = document.getElementById('userNameDisplay');
+            const emailDisplay = document.getElementById('userEmailDisplay');
+            const settingsName = document.getElementById('settingsName');
+            const settingsEmail = document.getElementById('settingsEmail');
+
+            if (nameDisplay) nameDisplay.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+            if (emailDisplay) emailDisplay.textContent = email;
+            if (settingsName) settingsName.value = name.charAt(0).toUpperCase() + name.slice(1);
+            if (settingsEmail) settingsEmail.value = email;
         }
 
         async function handleLogout() {
