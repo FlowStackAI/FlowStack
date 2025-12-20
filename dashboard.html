@@ -901,13 +901,11 @@
         .model-item-icon {
             width: 36px;
             height: 36px;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
-            background: #f1f5f9;
-            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+            font-size: 1.25rem;
+            background: transparent;
         }
 
         .model-item-name {
@@ -938,8 +936,8 @@
         }
 
         .model-item.selected .check-circle {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
+            background: #2563eb;
+            border-color: #2563eb;
         }
 
         .model-item.selected .check-circle::after {
@@ -947,7 +945,7 @@
             font-family: "Font Awesome 5 Free";
             font-weight: 900;
             color: white;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
         }
 
 
@@ -1506,19 +1504,19 @@
         let selectedModel = 'ChatGPT';
 
         const aiModels = [
-            { id: 'chatgpt', name: 'ChatGPT', icon: 'fas fa-robot', color: '#10a37f' },
+            { id: 'chatgpt', name: 'ChatGPT', icon: 'fas fa-snowflake', color: '#10a37f' },
             { id: 'deepseek', name: 'DeepSeek', icon: 'fas fa-circle-nodes', color: '#4b70e2' },
-            { id: 'chatgpt_image', name: 'chatGPT Image', icon: 'fas fa-wand-magic-sparkles', color: '#10a37f' },
-            { id: 'nano_banana', name: 'nano banana', icon: 'fas fa-leaf', color: '#facc15' },
-            { id: 'claude', name: 'Claude', icon: 'fas fa-feather-pointed', color: '#d97757' },
+            { id: 'chatgpt_image', name: 'chatGPT Image', icon: 'fas fa-snowflake', color: '#10a37f' },
+            { id: 'nano_banana', name: 'Nano Banana', icon: 'emoji', content: '🍌', color: '#facc15' },
+            { id: 'claude', name: 'Claude', icon: 'fas fa-sun', color: '#d97757' },
             { id: 'perplexity', name: 'Perplexity AI', icon: 'fas fa-atom', color: '#191a1a' },
-            { id: 'stable_diffusion', name: 'Stable Diffusion', icon: 'fas fa-palette', color: '#8b5cf6' },
+            { id: 'stable_diffusion', name: 'Stable Diffusion', icon: 'text', content: 'S.', color: '#8b5cf6' },
             { id: 'gemini', name: 'Gemini', icon: 'fas fa-sparkles', color: '#4285f4' },
-            { id: 'leonardo', name: 'Leonardo AI', icon: 'fas fa-paint-brush', color: '#2ecc71' },
-            { id: 'llama', name: 'LLaMa', icon: 'fas fa-paw', color: '#14b8a6' },
-            { id: 'mistral', name: 'Mistral', icon: 'fas fa-wind', color: '#6366f1' },
-            { id: 'grok', name: 'Grok', icon: 'fas fa-lightbulb', color: '#000000' },
-            { id: 'midjourney', name: 'Midjourney', icon: 'fas fa-mountain-sun', color: '#334155' }
+            { id: 'leonardo', name: 'Leonardo AI', icon: 'fas fa-user-tie', color: '#000000' },
+            { id: 'llama', name: 'LLaMa', icon: 'fab fa-meta', color: '#0081fb' },
+            { id: 'mistral', name: 'Mistral', icon: 'fas fa-border-all', color: '#f97316' },
+            { id: 'grok', name: 'Grok', icon: 'fas fa-slash', color: '#000000' },
+            { id: 'midjourney', name: 'Midjourney', icon: 'fas fa-sailboat', color: '#334155' }
         ];
 
         function populateModelList() {
@@ -1529,9 +1527,19 @@
                 const item = document.createElement('div');
                 item.className = `model-item ${selectedModel === model.name ? 'selected' : ''}`;
                 item.onclick = () => selectModel(model.name);
+
+                let iconHtml = '';
+                if (model.icon === 'emoji') {
+                    iconHtml = `<span style="font-size: 1.5rem;">${model.content}</span>`;
+                } else if (model.icon === 'text') {
+                    iconHtml = `<span style="font-weight: 800; font-size: 1.2rem; color: ${model.color}">${model.content}</span>`;
+                } else {
+                    iconHtml = `<i class="${model.icon}" style="color: ${model.color}"></i>`;
+                }
+
                 item.innerHTML = `
                     <div class="model-item-icon">
-                        <i class="${model.icon}" style="color: ${model.color}"></i>
+                        ${iconHtml}
                     </div>
                     <div class="model-item-name">${model.name}</div>
                     <div class="check-circle"></div>
@@ -1561,10 +1569,25 @@
             const model = aiModels.find(m => m.name === modelName);
             const selector = document.getElementById('aiModelSelector');
             if (selector && model) {
-                const icon = selector.querySelector('i.fas');
-                if (icon) {
-                    icon.className = model.icon;
-                    icon.style.color = model.color;
+                // Remove existing icon or span
+                const existingIcon = selector.querySelector('i, span');
+                const newIcon = document.createElement(model.icon === 'emoji' || model.icon === 'text' ? 'span' : 'i');
+
+                if (model.icon === 'emoji' || model.icon === 'text') {
+                    newIcon.style.fontSize = model.icon === 'emoji' ? '1.1rem' : '0.9rem';
+                    newIcon.style.fontWeight = model.icon === 'text' ? '800' : 'normal';
+                    newIcon.style.color = model.color;
+                    newIcon.innerText = model.content;
+                } else {
+                    newIcon.className = model.icon;
+                    newIcon.style.color = model.color;
+                    newIcon.style.fontSize = '0.7rem';
+                }
+
+                if (existingIcon) {
+                    existingIcon.replaceWith(newIcon);
+                } else {
+                    selector.prepend(newIcon);
                 }
             }
 
