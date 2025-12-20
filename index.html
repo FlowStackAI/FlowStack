@@ -10,6 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         :root {
             --primary-color: #4a6cf7;
             --secondary-color: #6a11cb;
@@ -369,6 +373,7 @@
             border-radius: 8px;
             font-size: 14px;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         .form-group input:focus {
@@ -536,9 +541,12 @@
             align-items: center;
             width: 100%;
             max-width: 280px;
+            box-sizing: border-box;
         }
 
         .password-container input {
+            width: 100% !important;
+            max-width: none !important;
             padding-right: 40px;
             /* Make room for the icon */
         }
