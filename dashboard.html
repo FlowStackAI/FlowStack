@@ -1504,19 +1504,19 @@
         let selectedModel = 'ChatGPT';
 
         const aiModels = [
-            { id: 'chatgpt', name: 'ChatGPT', icon: 'fas fa-snowflake', color: '#10a37f' },
-            { id: 'deepseek', name: 'DeepSeek', icon: 'fas fa-circle-nodes', color: '#4b70e2' },
-            { id: 'chatgpt_image', name: 'chatGPT Image', icon: 'fas fa-snowflake', color: '#10a37f' },
-            { id: 'nano_banana', name: 'Nano Banana', icon: 'emoji', content: '🍌', color: '#facc15' },
-            { id: 'claude', name: 'Claude', icon: 'fas fa-sun', color: '#d97757' },
-            { id: 'perplexity', name: 'Perplexity AI', icon: 'fas fa-atom', color: '#191a1a' },
-            { id: 'stable_diffusion', name: 'Stable Diffusion', icon: 'text', content: 'S.', color: '#8b5cf6' },
-            { id: 'gemini', name: 'Gemini', icon: 'fas fa-sparkles', color: '#4285f4' },
-            { id: 'leonardo', name: 'Leonardo AI', icon: 'fas fa-user-tie', color: '#000000' },
-            { id: 'llama', name: 'LLaMa', icon: 'fab fa-meta', color: '#0081fb' },
-            { id: 'mistral', name: 'Mistral', icon: 'fas fa-border-all', color: '#f97316' },
-            { id: 'grok', name: 'Grok', icon: 'fas fa-slash', color: '#000000' },
-            { id: 'midjourney', name: 'Midjourney', icon: 'fas fa-sailboat', color: '#334155' }
+            { id: 'chatgpt', name: 'ChatGPT', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ed/ChatGPT-Logo.svg' },
+            { id: 'deepseek', name: 'DeepSeek', logo: 'https://static.cdnlogo.com/logos/d/9/deepseek-icon.svg' },
+            { id: 'chatgpt_image', name: 'chatGPT Image', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ed/ChatGPT-Logo.svg' },
+            { id: 'nano_banana', name: 'Nano Banana', logo: 'https://cdn-icons-png.flaticon.com/512/2909/2909808.png' },
+            { id: 'claude', name: 'Claude', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Claude_AI_logo.svg' },
+            { id: 'perplexity', name: 'Perplexity AI', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Perplexity_AI_logo.svg' },
+            { id: 'stable_diffusion', name: 'Stable Diffusion', logo: 'https://static.cdnlogo.com/logos/s/1/stable-diffusion-logo.svg' },
+            { id: 'gemini', name: 'Gemini', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg' },
+            { id: 'leonardo', name: 'Leonardo AI', logo: 'https://cdn.worldvectorlogo.com/logos/leonardo-ai.svg' },
+            { id: 'llama', name: 'LLaMa', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
+            { id: 'mistral', name: 'Mistral', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Mistral_AI_logo_%282025%E2%80%93%29.svg' },
+            { id: 'grok', name: 'Grok', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Grok_logo_%282023-2025%29.svg' },
+            { id: 'midjourney', name: 'Midjourney', logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Midjourney_Emblem.svg' }
         ];
 
         function populateModelList() {
@@ -1528,18 +1528,9 @@
                 item.className = `model-item ${selectedModel === model.name ? 'selected' : ''}`;
                 item.onclick = () => selectModel(model.name);
 
-                let iconHtml = '';
-                if (model.icon === 'emoji') {
-                    iconHtml = `<span style="font-size: 1.5rem;">${model.content}</span>`;
-                } else if (model.icon === 'text') {
-                    iconHtml = `<span style="font-weight: 800; font-size: 1.2rem; color: ${model.color}">${model.content}</span>`;
-                } else {
-                    iconHtml = `<i class="${model.icon}" style="color: ${model.color}"></i>`;
-                }
-
                 item.innerHTML = `
                     <div class="model-item-icon">
-                        ${iconHtml}
+                        <img src="${model.logo}" alt="${model.name}" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px;">
                     </div>
                     <div class="model-item-name">${model.name}</div>
                     <div class="check-circle"></div>
@@ -1569,25 +1560,21 @@
             const model = aiModels.find(m => m.name === modelName);
             const selector = document.getElementById('aiModelSelector');
             if (selector && model) {
-                // Remove existing icon or span
-                const existingIcon = selector.querySelector('i, span');
-                const newIcon = document.createElement(model.icon === 'emoji' || model.icon === 'text' ? 'span' : 'i');
+                // Remove existing icon or span or img
+                const existingElement = selector.querySelector('i, span, img');
+                const newImg = document.createElement('img');
+                newImg.src = model.logo;
+                newImg.alt = model.name;
+                newImg.style.width = '18px';
+                newImg.style.height = '18px';
+                newImg.style.objectFit = 'contain';
+                newImg.style.borderRadius = '2px';
+                newImg.style.marginRight = '4px';
 
-                if (model.icon === 'emoji' || model.icon === 'text') {
-                    newIcon.style.fontSize = model.icon === 'emoji' ? '1.1rem' : '0.9rem';
-                    newIcon.style.fontWeight = model.icon === 'text' ? '800' : 'normal';
-                    newIcon.style.color = model.color;
-                    newIcon.innerText = model.content;
+                if (existingElement) {
+                    existingElement.replaceWith(newImg);
                 } else {
-                    newIcon.className = model.icon;
-                    newIcon.style.color = model.color;
-                    newIcon.style.fontSize = '0.7rem';
-                }
-
-                if (existingIcon) {
-                    existingIcon.replaceWith(newIcon);
-                } else {
-                    selector.prepend(newIcon);
+                    selector.prepend(newImg);
                 }
             }
 
