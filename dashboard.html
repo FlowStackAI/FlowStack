@@ -7,6 +7,15 @@
     <title>Dashboard - FlowStack</title>
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Gemini SDK -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -823,6 +832,218 @@
             filter: brightness(1.1);
         }
 
+        /* Chat Messages Container */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            animation: messageFadeIn 0.3s ease-out;
+        }
+
+        @keyframes messageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-user {
+            align-self: flex-end;
+            background: var(--accent-gradient);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-ai {
+            align-self: flex-start;
+            background: #f1f5f9;
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .message-info {
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .avatar-mini {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: contain;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            width: fit-content;
+            margin-bottom: 16px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: dotFlashing 1s infinite alternate;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotFlashing {
+            0% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .chat-view-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-hero.hidden {
+            display: none;
+        }
+
+        /* Prompt Library Styles */
+        .prompt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .prompt-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 25px rgba(74, 108, 247, 0.1);
+        }
+
+        .prompt-card .category-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary-color);
+            background: rgba(74, 108, 247, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .prompt-card h4 {
+            font-size: 1rem;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .prompt-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .prompt-card .use-prompt-btn {
+            margin-top: auto;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .prompt-card .use-prompt-btn i {
+            font-size: 0.7rem;
+        }
+
+        .prompt-filters {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+
+        .prompt-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-chip.active {
+            background: var(--accent-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
         /* AI Model Selection Modal */
         .model-modal-overlay {
             display: none;
@@ -1163,9 +1384,7 @@
             <a href="#" class="nav-item" onclick="showView('ai-chat')">
                 <i class="fas fa-robot"></i> AI Tools
             </a>
-
-            <div class="nav-label">RESOURCES</div>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item" onclick="showView('prompt-library')">
                 <i class="fas fa-book"></i> Prompt Library
             </a>
         </nav>
@@ -1252,7 +1471,7 @@
 
         <!-- AI Chat View -->
         <div id="view-ai-chat" style="display: none; height: 100%;">
-            <div class="chat-view-container">
+            <div class="chat-view-container" style="width: 100%;">
                 <header class="chat-view-header">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-robot" style="color: var(--primary-color);"></i>
@@ -1263,7 +1482,11 @@
                     </button>
                 </header>
 
-                <div class="chat-hero">
+                <div id="chatMessages" class="chat-messages" style="display: none;">
+                    <!-- Messages will be populated here -->
+                </div>
+
+                <div class="chat-hero" id="chatHero">
                     <h1>How can I help you?</h1>
 
                     <div class="chat-input-area">
@@ -1281,20 +1504,44 @@
                                 <i class="fas fa-pen-nib" style="color: #ec4899;"></i> Help me write
                             </div>
                         </div>
-
-                        <div class="chat-input-wrapper">
-                            <input type="text" id="aiChatInput" placeholder="Ask anything"
-                                onkeypress="if(event.key === 'Enter') sendAiMessage()">
-                            <div class="model-selector" id="aiModelSelector" onclick="toggleModelModal()">
-                                <i class="fas fa-bolt" style="color: #f59e0b; font-size: 0.7rem;"></i>
-                                <span id="currentAiModel">ChatGPT</span>
-                                <i class="fas fa-chevron-down" style="font-size: 0.6rem; margin-left: 2px;"></i>
-                            </div>
-                            <button class="send-btn-circle" onclick="sendAiMessage()">
-                                <i class="fas fa-arrow-up"></i>
-                            </button>
-                        </div>
                     </div>
+                </div>
+
+                <div class="chat-input-area" style="margin-top: auto; padding: 20px;">
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="aiChatInput" placeholder="Ask anything"
+                            onkeypress="if(event.key === 'Enter') sendAiMessage()">
+                        <div class="model-selector" id="aiModelSelector" onclick="toggleModelModal()">
+                            <i class="fas fa-bolt" style="color: #f59e0b; font-size: 0.7rem;"></i>
+                            <span id="currentAiModel">ChatGPT</span>
+                            <i class="fas fa-chevron-down" style="font-size: 0.6rem; margin-left: 2px;"></i>
+                        </div>
+                        <button class="send-btn-circle" onclick="sendAiMessage()">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prompt Library View -->
+        <div id="view-prompt-library" style="display: none; height: 100%;">
+            <div class="chat-view-container" style="padding: 24px; overflow-y: auto; width: 100%;">
+                <header style="margin-bottom: 30px;">
+                    <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 10px;">Prompt Library</h2>
+                    <p style="color: var(--text-muted);">Curated high-performance prompts for your digital business.</p>
+                </header>
+
+                <div class="prompt-filters">
+                    <div class="filter-chip active" onclick="filterPrompts('All')">All</div>
+                    <div class="filter-chip" onclick="filterPrompts('SaaS')">SaaS</div>
+                    <div class="filter-chip" onclick="filterPrompts('Copywriting')">Copywriting</div>
+                    <div class="filter-chip" onclick="filterPrompts('Marketing')">Marketing</div>
+                    <div class="filter-chip" onclick="filterPrompts('Trading')">Trading</div>
+                </div>
+
+                <div class="prompt-grid" id="promptGrid">
+                    <!-- Prompts will be dynamically generated -->
                 </div>
             </div>
         </div>
@@ -1584,7 +1831,7 @@
         // --- NAVIGATION & UI ---
         function showView(viewName) {
             // Hide all views
-            ['dashboard', 'ai-chat', 'settings'].forEach(v => {
+            ['dashboard', 'ai-chat', 'settings', 'prompt-library'].forEach(v => {
                 const view = document.getElementById('view-' + v);
                 if (view) view.style.display = 'none';
             });
@@ -1644,31 +1891,107 @@
         function sendAiMessage() {
             const input = document.getElementById('aiChatInput');
             const message = input.value.trim();
-            if (message) {
-                console.log(`Sending AI message to ${selectedModel}:`, message);
+            if (!message) return;
 
-                // Simulate tool-specific response
-                let responsePrefix = "";
-                switch (selectedModel) {
-                    case 'ChatGPT': responsePrefix = "ChatGPT here! 🤖"; break;
-                    case 'DeepSeek': responsePrefix = "DeepSeek at your service. 🔍"; break;
-                    case 'chatGPT Image': responsePrefix = "Generating image concept... 🎨"; break;
-                    case 'nano banana': responsePrefix = "Banana-powered AI ready! 🍌"; break;
-                    case 'Claude': responsePrefix = "Claude here to assist. 🧠"; break;
-                    case 'Perplexity AI': responsePrefix = "Researching your query... 🌐"; break;
-                    case 'Stable Diffusion': responsePrefix = "Painting pixels... 🖌️"; break;
-                    case 'Gemini': responsePrefix = "Gemini processing... ✨"; break;
-                    case 'Leonardo AI': responsePrefix = "Creating art... 🎭"; break;
-                    case 'LLaMa': responsePrefix = "LLaMa standing by. 🦙"; break;
-                    case 'Mistral': responsePrefix = "Mistral responding... 🌬️"; break;
-                    case 'Grok': responsePrefix = "Grokking your request... 💡"; break;
-                    case 'Midjourney': responsePrefix = "Dreaming up visual... 🏔️"; break;
-                    default: responsePrefix = `${selectedModel} responding...`;
-                }
+            const chatHero = document.getElementById('chatHero');
+            const chatMessages = document.getElementById('chatMessages');
 
-                alert(`${responsePrefix}\n\nI received: "${message}"\n\n(This is a UI demo, actual API integration coming soon!)`);
-                input.value = '';
+            if (chatHero) chatHero.style.display = 'none';
+            if (chatMessages) chatMessages.style.display = 'flex';
+
+            appendMessage('user', message);
+            input.value = '';
+
+            // Simulate AI response
+            showTypingIndicator();
+
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = getModelResponse(message);
+                appendMessage('ai', response);
+            }, 1500);
+        }
+
+        function appendMessage(role, text) {
+            const container = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-bubble message-${role}`;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'message-info';
+
+            const model = aiModels.find(m => m.name === selectedModel);
+            if (role === 'ai' && model) {
+                infoDiv.innerHTML = `<img src="${model.logo}" class="avatar-mini"> ${selectedModel}`;
+            } else {
+                infoDiv.innerHTML = `<i class="fas fa-user"></i> You`;
             }
+
+            messageDiv.appendChild(infoDiv);
+            const textDiv = document.createElement('div');
+            textDiv.textContent = text;
+            messageDiv.appendChild(textDiv);
+
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const indicator = document.createElement('div');
+            indicator.id = 'typingIndicator';
+            indicator.className = 'typing-indicator';
+            indicator.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+            container.appendChild(indicator);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function getModelResponse(userInput) {
+            const lowerInput = userInput.toLowerCase();
+            let response = "";
+
+            // Custom responses based on model
+            switch (selectedModel) {
+                case 'ChatGPT':
+                    response = "As an AI language model by OpenAI, I'm here to help! " +
+                        (lowerInput.includes('saas') ? "Building a SaaS is a great way to generate recurring revenue. Have you thought about your target niche?" :
+                            lowerInput.includes('marketing') ? "Digital marketing is all about data and creativity. Facebook Ads are a good place to start." :
+                                "That's an interesting question. How can I elaborate further on that for you?");
+                    break;
+                case 'Claude':
+                    response = "I'm Claude, focused on being helpful, harmless, and honest. " +
+                        (lowerInput.includes('help') ? "I'd be happy to assist you with your project. What specifically are you working on?" :
+                            "I've analyzed your input, and I believe we should approach this systematically.");
+                    break;
+                case 'Gemini':
+                    response = "Hello! I'm Gemini, Google's largest and most capable AI model. " +
+                        "I can help you brainstorm code, write content, or plan your business strategy. What's next on your list?";
+                    break;
+                case 'DeepSeek':
+                    response = "DeepSeek here. I specialize in deep reasoning and technical tasks. " +
+                        "Let's dive into the details of your query.";
+                    break;
+                case 'Perplexity AI':
+                    response = "Searching the web for the latest info... 🌐 Based on recent sources, " +
+                        "your query is related to current trends in the digital economy. Would you like more specific citations?";
+                    break;
+                case 'Stable Diffusion':
+                    response = "I'm an image generation model. While I can't 'chat' in the traditional sense, I can describe " +
+                        "how I would visualize: '" + userInput + "'. Should I generate a prompt for this?";
+                    break;
+                case 'Midjourney':
+                    response = "Creating a high-quality visual concept... 🏔️ For the prompt '" + userInput + "', " +
+                        "I would suggest using --v 6 and a cinematic lighting style.";
+                    break;
+                default:
+                    response = `I am ${selectedModel}. I've received your message: "${userInput}". Since this is a specialized tool, I will apply my unique algorithms to help you achieve your goal!`;
+            }
+            return response;
         }
 
 
@@ -2273,6 +2596,120 @@
 
         // Initialize Grid on Load (Default En)
         renderGrid();
+
+        // --- PROMPT LIBRARY ---
+        const prompts = [
+            { category: 'SaaS', title: 'Niche Brainstorming', text: 'Help me brainstorm 5 unique SaaS ideas for the [Industry] industry. Focus on problems that can be solved with automation or specialized data analysis.' },
+            { category: 'SaaS', title: 'Feature Prioritization', text: 'I am building a SaaS for [User Base]. What are the top 3 high-impact features I should include in the MVP to ensure user retention?' },
+            { category: 'Copywriting', title: 'Landing Page Headline', text: 'Write 10 high-converting headlines for a landing page selling a [Product/Service]. Use the framework of "Benefit + Speed + Objection Handling".' },
+            { category: 'Copywriting', title: 'Email Sequence', text: 'Create a 5-day welcome email sequence for new subscribers of [Newsletter/Service]. Focus on building trust and leading to a sale of [Product].' },
+            { category: 'Marketing', title: 'Content Strategy', text: 'Create a 30-day social media content calendar for [Business Type] on TikTok and Instagram. Focus on educational content that builds authority.' },
+            { category: 'Marketing', title: 'Ad Creative Ideas', text: 'Suggest 5 different ad creative concepts for a Facebook campaign targeting [Audience]. Include hooks and primary text.' },
+            { category: 'Trading', title: 'Strategy Backtesting', text: 'Explain how to backtest a [Indicator Name] strategy using historical data. What are the key metrics I should look for to avoid curve-fitting?' },
+            { category: 'Trading', title: 'Risk Management', text: 'Create a risk management plan for a beginner trader with a $[Capital] account. Include position sizing and maximum daily drawdown rules.' }
+        ];
+
+        function renderPrompts(filter = 'All') {
+            const grid = document.getElementById('promptGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const filtered = filter === 'All' ? prompts : prompts.filter(p => p.category === filter);
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'prompt-card';
+                card.onclick = () => usePrompt(p.text);
+                card.innerHTML = `
+                    <span class="category-tag">${p.category}</span>
+                    <h4>${p.title}</h4>
+                    <p>${p.text}</p>
+                    <div class="use-prompt-btn">
+                        <i class="fas fa-magic"></i> Use this prompt
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterPrompts(category) {
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.textContent === category);
+            });
+            renderPrompts(category);
+        }
+
+        function usePrompt(text) {
+            showView('ai-chat');
+            document.getElementById('aiChatInput').value = text;
+            document.getElementById('aiChatInput').focus();
+        }
+
+        // --- GEMINI API INTEGRATION ---
+        let geminiApiKey = ""; // USER: Place your Gemini API key here
+
+        async function getGeminiResponse(prompt) {
+            if (!geminiApiKey) {
+                console.warn("Gemini API key missing. Using simulation.");
+                return null;
+            }
+
+            try {
+                const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                const genAI = new GoogleGenerativeAI(geminiApiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+                // Add context about the platform
+                const finalPrompt = `You are a helpful assistant on FlowStack, a platform for modern income education. 
+                Keep your answers focused on digital skills, SaaS, marketing, and business growth.
+                User says: ${prompt}`;
+
+                const result = await model.generateContent(finalPrompt);
+                const response = await result.response;
+                return response.text();
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                return "Sorry, I encountered an error connecting to the AI brain. Please check the API key.";
+            }
+        }
+
+        // Update sendAiMessage to use Gemini
+        const originalSendAiMessage = sendAiMessage;
+        sendAiMessage = async function () {
+            const input = document.getElementById('aiChatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatHero = document.getElementById('chatHero');
+            const chatMessages = document.getElementById('chatMessages');
+
+            if (chatHero) chatHero.style.display = 'none';
+            if (chatMessages) chatMessages.style.display = 'flex';
+
+            appendMessage('user', message);
+            input.value = '';
+
+            showTypingIndicator();
+
+            try {
+                let response = await getGeminiResponse(message);
+
+                if (!response) {
+                    // Fallback to simulation
+                    await new Promise(r => setTimeout(r, 1000));
+                    response = getModelResponse(message);
+                }
+
+                hideTypingIndicator();
+                appendMessage('ai', response);
+            } catch (err) {
+                hideTypingIndicator();
+                appendMessage('ai', "Error processing message. Please try again.");
+            }
+        };
+
+        // Initialize Prompt Library
+        renderPrompts();
 
         // Supabase Init
         checkAuth();
