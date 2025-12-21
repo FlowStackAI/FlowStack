@@ -1889,7 +1889,7 @@
             }
         }
 
-        function sendAiMessage() {
+        async function sendAiMessage() {
             const input = document.getElementById('aiChatInput');
             const message = input.value.trim();
             if (!message) return;
@@ -1903,14 +1903,23 @@
             appendMessage('user', message);
             input.value = '';
 
-            // Simulate AI response
             showTypingIndicator();
 
-            setTimeout(() => {
+            try {
+                let response = await getGeminiResponse(message);
+
+                if (!response) {
+                    // Fallback to simulation
+                    await new Promise(r => setTimeout(r, 800 + Math.random() * 1000));
+                    response = getModelResponse(message);
+                }
+
                 hideTypingIndicator();
-                const response = getModelResponse(message);
                 appendMessage('ai', response);
-            }, 1500);
+            } catch (err) {
+                hideTypingIndicator();
+                appendMessage('ai', "Error connecting to AI. Please try again or check your connection.");
+            }
         }
 
         function appendMessage(role, text) {
@@ -1954,45 +1963,44 @@
 
         function getModelResponse(userInput) {
             const lowerInput = userInput.toLowerCase();
-            let response = "";
+            const genericResponses = [
+                "I've analyzed your thoughts on that. It's a key area in modern business.",
+                "That's a valid point. Many successful entrepreneurs focus on exactly that.",
+                "Interesting perspective! How do you plan to implement this in your own project?",
+                "I see where you're coming from. There's a lot of potential in that approach.",
+                "Good question! It really depends on your specific goals and market niche.",
+                "Let's explore that further. What's the biggest challenge you're facing right now with this?"
+            ];
 
-            // Custom responses based on model
+            const getRandomGeneric = () => genericResponses[Math.floor(Math.random() * genericResponses.length)];
+
+            // Keyword based logic
+            if (lowerInput.includes('hello') || lowerInput.includes('hi ')) return `Hello! I'm your ${selectedModel} assistant. How can I help you build your digital empire today?`;
+            if (lowerInput.includes('help')) return "I'm here to help! Whether it's SaaS, Marketing, or Trading, I've got you covered. What's on your mind?";
+            if (lowerInput.includes('saas') || lowerInput.includes('software')) return "Building a SaaS is one of the best ways to scale. I recommend focusing on a specific pain point for a niche audience first.";
+            if (lowerInput.includes('marketing') || lowerInput.includes('ads')) return "Marketing is 80% psychology and 20% mechanics. Are you looking to improve your hooks or your overall strategy?";
+            if (lowerInput.includes('copywriting') || lowerInput.includes('writing')) return "Good copy sells. Focus on benefits over features, and always include a strong call to action.";
+            if (lowerInput.includes('trading') || lowerInput.includes('crypto')) return "Trading requires discipline and a solid risk management plan. Never risk more than 1-2% of your capital on a single trade.";
+
+            // Model specific personas if no keywords match
             switch (selectedModel) {
                 case 'ChatGPT':
-                    response = "As an AI language model by OpenAI, I'm here to help! " +
-                        (lowerInput.includes('saas') ? "Building a SaaS is a great way to generate recurring revenue. Have you thought about your target niche?" :
-                            lowerInput.includes('marketing') ? "Digital marketing is all about data and creativity. Facebook Ads are a good place to start." :
-                                "That's an interesting question. How can I elaborate further on that for you?");
-                    break;
+                    return "As an AI by OpenAI, I'm trained to assist with complex tasks. " + getRandomGeneric();
                 case 'Claude':
-                    response = "I'm Claude, focused on being helpful, harmless, and honest. " +
-                        (lowerInput.includes('help') ? "I'd be happy to assist you with your project. What specifically are you working on?" :
-                            "I've analyzed your input, and I believe we should approach this systematically.");
-                    break;
+                    return "I'm Claude, and I prioritize clear, helpful, and honest advice. " + getRandomGeneric();
                 case 'Gemini':
-                    response = "Hello! I'm Gemini, Google's largest and most capable AI model. " +
-                        "I can help you brainstorm code, write content, or plan your business strategy. What's next on your list?";
-                    break;
+                    return "I'm Gemini, powered by Google's latest models. Let's solve this! " + getRandomGeneric();
                 case 'DeepSeek':
-                    response = "DeepSeek here. I specialize in deep reasoning and technical tasks. " +
-                        "Let's dive into the details of your query.";
-                    break;
+                    return "DeepSeek here. Let's break down the logic of your request. " + getRandomGeneric();
                 case 'Perplexity AI':
-                    response = "Searching the web for the latest info... 🌐 Based on recent sources, " +
-                        "your query is related to current trends in the digital economy. Would you like more specific citations?";
-                    break;
+                    return "Searching my knowledge base... 🌐 " + getRandomGeneric();
                 case 'Stable Diffusion':
-                    response = "I'm an image generation model. While I can't 'chat' in the traditional sense, I can describe " +
-                        "how I would visualize: '" + userInput + "'. Should I generate a prompt for this?";
-                    break;
                 case 'Midjourney':
-                    response = "Creating a high-quality visual concept... 🏔️ For the prompt '" + userInput + "', " +
-                        "I would suggest using --v 6 and a cinematic lighting style.";
-                    break;
+                case 'Leonardo AI':
+                    return `As a visual AI, I'd imagine "${userInput}" as a stunning digital masterpiece. Should I help you write a prompt for it?`;
                 default:
-                    response = `I am ${selectedModel}. I've received your message: "${userInput}". Since this is a specialized tool, I will apply my unique algorithms to help you achieve your goal!`;
+                    return `I am ${selectedModel}, your AI assistant. ` + getRandomGeneric();
             }
-            return response;
         }
 
 
@@ -2674,40 +2682,7 @@
             }
         }
 
-        // Update sendAiMessage to use Gemini
-        const originalSendAiMessage = sendAiMessage;
-        sendAiMessage = async function () {
-            const input = document.getElementById('aiChatInput');
-            const message = input.value.trim();
-            if (!message) return;
-
-            const chatHero = document.getElementById('chatHero');
-            const chatMessages = document.getElementById('chatMessages');
-
-            if (chatHero) chatHero.style.display = 'none';
-            if (chatMessages) chatMessages.style.display = 'flex';
-
-            appendMessage('user', message);
-            input.value = '';
-
-            showTypingIndicator();
-
-            try {
-                let response = await getGeminiResponse(message);
-
-                if (!response) {
-                    // Fallback to simulation
-                    await new Promise(r => setTimeout(r, 1000));
-                    response = getModelResponse(message);
-                }
-
-                hideTypingIndicator();
-                appendMessage('ai', response);
-            } catch (err) {
-                hideTypingIndicator();
-                appendMessage('ai', "Error processing message. Please try again.");
-            }
-        };
+        // sendAiMessage is now defined globally above
 
         // Initialize Prompt Library
         renderPrompts();
