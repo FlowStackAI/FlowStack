@@ -39,26 +39,21 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
+            background-color: var(--bg-light);
             color: var(--text-main);
-            overflow: hidden;
-            /* Prevent body scroll */
-            height: 100vh;
             display: flex;
+            min-height: 100vh;
         }
 
         /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
-            height: 100vh;
             background: white;
             border-right: 1px solid var(--border-color);
-            position: fixed;
-            left: 0;
-            top: 0;
             display: flex;
             flex-direction: column;
+            position: fixed;
+            height: 100vh;
             z-index: 1000;
             transition: transform 0.3s ease;
         }
@@ -116,30 +111,6 @@
             margin-bottom: 8px;
         }
 
-        /* 2-Column Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 30px;
-            align-items: start;
-        }
-
-        .dashboard-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-sidebar {
-                order: -1;
-                /* Progress first on tablets if preferred, or keep natural order */
-            }
-        }
 
         .nav-item {
             display: flex;
@@ -269,13 +240,12 @@
         .main-wrapper {
             flex: 1;
             margin-left: var(--sidebar-width);
-            padding: 30px 40px;
-            max-width: 100%;
-            height: 100vh;
-            overflow-y: auto;
-            /* Independent scroll */
+            padding: 24px 40px;
+            max-width: 1400px;
+            margin-right: auto;
+            transition: margin-left 0.3s ease;
             position: relative;
-            background: var(--bg-main);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -1024,17 +994,13 @@
         .chat-view-container {
             display: flex;
             flex-direction: column;
-            height: 100%;
-            width: 850px;
-            /* Fixed static width for stability */
-            max-width: 95%;
-            margin: 0 auto;
+            height: calc(100vh - 80px);
+            max-height: 900px;
             background: white;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             overflow: hidden;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         .chat-view-header {
@@ -1523,27 +1489,27 @@
 
         .details-overlay {
             display: none;
-            position: fixed;
-            top: 20px;
-            left: calc(var(--sidebar-width) + 20px);
-            right: 20px;
-            bottom: 20px;
-            background: rgba(248, 250, 252, 0.98);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
             z-index: 2000;
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+            padding: 20px;
         }
 
         .details-content {
             background: white;
+            margin: 0 auto;
             padding: 40px;
             width: 100%;
-            height: 100%;
-            overflow-y: auto;
+            max-width: 1000px;
+            border-radius: 20px;
             position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
         }
 
         .close-details {
@@ -1798,50 +1764,46 @@
                 </div>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="dashboard-main">
-                    <div class="section-label" data-i18n="label_select_path">SELECT YOUR PATH</div>
-                    <div class="courses-grid" id="coursesGrid">
-                        <!-- Populated by JS -->
+            <div class="section-label" data-i18n="label_select_path">SELECT YOUR PATH</div>
+            <div class="courses-grid" id="coursesGrid">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="progress-section" style="margin-top: 40px;">
+                <div class="section-label" data-i18n="label_your_progress" style="margin-bottom: 20px;">YOUR PROGRESS
+                </div>
+                <div
+                    style="display: flex; align-items: center; gap: 20px; background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color);">
+                    <div class="progress-circle">
+                        <div class="progress-circle-inner" style="background: white; color: var(--primary-color);">11%
+                        </div>
+                    </div>
+                    <div class="progress-info">
+                        <div class="progress-text" style="font-weight: 600; color: var(--text-main);">Getting warmed up!
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="dashboard-sidebar">
-                    <div class="section-label" data-i18n="label_your_progress">YOUR PROGRESS</div>
-                    <div class="progress-section">
-                        <div class="progress-circle">
-                            <div class="progress-circle-inner" style="background: white; color: var(--primary-color);">
-                                11%</div>
+            <div class="section-label" data-i18n="label_current_module" style="margin-top: 40px;">CURRENT MODULE</div>
+            <div class="module-group">
+                <div class="module-name">Module 1: Understand the Game</div>
+                <div class="lesson-count">6 Lessons</div>
+                <div class="module-list">
+                    <a href="course.html" class="lesson-item">
+                        <div class="lesson-icon" style="background: #eff6ff;"><i class="fas fa-play"></i></div>
+                        <div class="lesson-info">
+                            <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson 1</div>
+                            <div class="lesson-title">Why you're here</div>
                         </div>
-                        <div class="progress-info">
-                            <div class="progress-text" style="font-weight: 600; color: var(--text-main);">Getting warmed
-                                up!</div>
+                    </a>
+                    <div class="lesson-item" style="opacity: 0.6;">
+                        <div class="lesson-icon"><i class="fas fa-lock"></i></div>
+                        <div class="lesson-info">
+                            <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson 2</div>
+                            <div class="lesson-title">Learn how automations work</div>
                         </div>
-                    </div>
-
-                    <div class="section-label" data-i18n="label_current_module">CURRENT MODULE</div>
-                    <div class="module-group">
-                        <div class="module-name">Module 1: Understand the Game</div>
-                        <div class="lesson-count">6 Lessons</div>
-                        <div class="module-list">
-                            <a href="course.html" class="lesson-item">
-                                <div class="lesson-icon" style="background: #eff6ff;"><i class="fas fa-play"></i></div>
-                                <div class="lesson-info">
-                                    <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson
-                                        1</div>
-                                    <div class="lesson-title">Why you're here</div>
-                                </div>
-                            </a>
-                            <div class="lesson-item" style="opacity: 0.6;">
-                                <div class="lesson-icon"><i class="fas fa-lock"></i></div>
-                                <div class="lesson-info">
-                                    <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson
-                                        2</div>
-                                    <div class="lesson-title">Learn how automations work</div>
-                                </div>
-                                <div class="lesson-status"><i class="fas fa-lock"></i></div>
-                            </div>
-                        </div>
+                        <div class="lesson-status"><i class="fas fa-lock"></i></div>
                     </div>
                 </div>
             </div>
