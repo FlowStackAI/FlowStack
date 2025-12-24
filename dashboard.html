@@ -102,6 +102,40 @@
             font-weight: 600;
         }
 
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        /* 2-Column Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .dashboard-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-sidebar {
+                order: -1;
+                /* Progress first on tablets if preferred, or keep natural order */
+            }
+        }
+
         .nav-item {
             display: flex;
             align-items: center;
@@ -230,10 +264,16 @@
         .main-wrapper {
             flex: 1;
             margin-left: var(--sidebar-width);
-            padding: 60px 80px;
+            padding: 40px 60px;
+            /* Reduced padding */
             max-width: 1600px;
             margin-right: auto;
             transition: margin-left 0.3s ease;
+            position: relative;
+            /* For contained overlays */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Mobile Header */
@@ -1231,11 +1271,38 @@
         .chat-view-container {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: calc(100vh - 80px);
+            /* Fixed height */
+            max-height: 900px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            /* Prevent outer scroll */
+            position: relative;
         }
 
-        .chat-hero.hidden {
-            display: none;
+        .chat-view-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-input-section {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            background: white;
+            flex-shrink: 0;
         }
 
         /* Prompt Library Styles */
@@ -1469,26 +1536,28 @@
 
         .details-overlay {
             display: none;
-            position: fixed;
+            position: absolute;
+            /* Changed from fixed to absolute */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.8);
             z-index: 2000;
-            overflow-y: auto;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
+            padding: 20px;
         }
 
         .details-content {
             background: white;
-            margin: 5% auto;
+            margin: 0 auto;
             padding: 40px;
-            width: 90%;
+            width: 100%;
             max-width: 1000px;
             border-radius: 20px;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
         }
 
         .close-details {
@@ -1655,11 +1724,6 @@
             color: var(--primary-color);
             font-weight: bold;
         }
-
-        /* Overlay placeholder */
-        #detailsOverlay {
-            display: none;
-        }
     </style>
 </head>
 
@@ -1734,6 +1798,8 @@
 
     <!-- Main Content -->
     <main class="main-wrapper" id="mainContent" style="display: none;">
+        <!-- Course Selection Details (Contained) -->
+        <div id="detailsOverlay" class="details-overlay"></div>
         <!-- Dashboard View -->
         <div id="view-dashboard">
             <div class="page-header">
@@ -1746,41 +1812,50 @@
                 </div>
             </div>
 
-            <div class="progress-section">
-                <div class="progress-circle">
-                    <div class="progress-circle-inner" style="background: white; color: var(--primary-color);">11%</div>
-                </div>
-                <div class="progress-info">
-                    <div class="progress-text" style="font-weight: 600; color: var(--text-main);">Getting warmed up!
+            <div class="dashboard-grid">
+                <div class="dashboard-main">
+                    <div class="section-label" data-i18n="label_select_path">SELECT YOUR PATH</div>
+                    <div class="courses-grid" id="coursesGrid">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
-            </div>
 
-            <div class="section-label">COURSES</div>
-            <div class="courses-grid" id="coursesGrid">
-                <!-- Populated by JS -->
-            </div>
+                <div class="dashboard-sidebar">
+                    <div class="section-label" data-i18n="label_your_progress">YOUR PROGRESS</div>
+                    <div class="progress-section">
+                        <div class="progress-circle">
+                            <div class="progress-circle-inner" style="background: white; color: var(--primary-color);">
+                                11%</div>
+                        </div>
+                        <div class="progress-info">
+                            <div class="progress-text" style="font-weight: 600; color: var(--text-main);">Getting warmed
+                                up!</div>
+                        </div>
+                    </div>
 
-            <div class="module-group">
-                <div class="module-name">Module 1: Understand the Game</div>
-                <div class="lesson-count">6 Lessons</div>
-                <div class="module-list">
-                    <a href="course.html" class="lesson-item">
-                        <div class="lesson-icon" style="background: #eff6ff;"><i class="fas fa-play"></i></div>
-                        <div class="lesson-info">
-                            <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson 1
+                    <div class="section-label" data-i18n="label_current_module">CURRENT MODULE</div>
+                    <div class="module-group">
+                        <div class="module-name">Module 1: Understand the Game</div>
+                        <div class="lesson-count">6 Lessons</div>
+                        <div class="module-list">
+                            <a href="course.html" class="lesson-item">
+                                <div class="lesson-icon" style="background: #eff6ff;"><i class="fas fa-play"></i></div>
+                                <div class="lesson-info">
+                                    <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson
+                                        1</div>
+                                    <div class="lesson-title">Why you're here</div>
+                                </div>
+                            </a>
+                            <div class="lesson-item" style="opacity: 0.6;">
+                                <div class="lesson-icon"><i class="fas fa-lock"></i></div>
+                                <div class="lesson-info">
+                                    <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson
+                                        2</div>
+                                    <div class="lesson-title">Learn how automations work</div>
+                                </div>
+                                <div class="lesson-status"><i class="fas fa-lock"></i></div>
                             </div>
-                            <div class="lesson-title">Why you're here</div>
                         </div>
-                    </a>
-                    <div class="lesson-item" style="opacity: 0.6;">
-                        <div class="lesson-icon"><i class="fas fa-lock"></i></div>
-                        <div class="lesson-info">
-                            <div class="lesson-meta" style="font-size: 0.7rem; color: var(--text-muted);">Lesson 2
-                            </div>
-                            <div class="lesson-title">Learn how automations work</div>
-                        </div>
-                        <div class="lesson-status"><i class="fas fa-lock"></i></div>
                     </div>
                 </div>
             </div>
@@ -1788,43 +1863,38 @@
 
         <!-- AI Chat View -->
         <div id="view-ai-chat" style="display: none; height: 100%;">
-            <div class="chat-view-container" style="width: 100%;">
+            <div class="chat-view-container">
                 <header class="chat-view-header">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-robot" style="color: var(--primary-color);"></i>
                         <h2>AI chat</h2>
                     </div>
-                    <button class="history-btn" title="Chat History">
-                        <i class="fas fa-history"></i>
-                    </button>
                 </header>
 
                 <div id="chatMessages" class="chat-messages" style="display: none;">
                     <!-- Messages will be populated here -->
                 </div>
 
-                <div class="chat-hero" id="chatHero">
-                    <h1>How can I help you?</h1>
-
-                    <div class="chat-input-area">
-                        <div class="suggestion-chips">
-                            <div class="chip" onclick="useSuggestion('Give advice')">
-                                <i class="far fa-lightbulb" style="color: #eab308;"></i> Give advice
-                            </div>
-                            <div class="chip" onclick="useSuggestion('Brainstorm ideas')">
-                                <i class="fas fa-wand-magic-sparkles" style="color: #a855f7;"></i> Brainstorm ideas
-                            </div>
-                            <div class="chip" onclick="useSuggestion('Summarize text')">
-                                <i class="fas fa-align-left" style="color: #3b82f6;"></i> Summarize text
-                            </div>
-                            <div class="chip" onclick="useSuggestion('Help me write')">
-                                <i class="fas fa-pen-nib" style="color: #ec4899;"></i> Help me write
-                            </div>
+                <div class="chat-hero" id="chatHero"
+                    style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px;">
+                    <h1 style="text-align: center; margin-bottom: 30px;">How can I help you?</h1>
+                    <div class="suggestion-chips" style="justify-content: center;">
+                        <div class="chip" onclick="useSuggestion('Give advice')">
+                            <i class="far fa-lightbulb" style="color: #eab308;"></i> Give advice
+                        </div>
+                        <div class="chip" onclick="useSuggestion('Brainstorm ideas')">
+                            <i class="fas fa-wand-magic-sparkles" style="color: #a855f7;"></i> Brainstorm ideas
+                        </div>
+                        <div class="chip" onclick="useSuggestion('Summarize text')">
+                            <i class="fas fa-align-left" style="color: #3b82f6;"></i> Summarize text
+                        </div>
+                        <div class="chip" onclick="useSuggestion('Help me write')">
+                            <i class="fas fa-pen-nib" style="color: #ec4899;"></i> Help me write
                         </div>
                     </div>
                 </div>
 
-                <div class="chat-input-area" style="margin-top: auto; padding: 20px;">
+                <div class="chat-input-section">
                     <div class="chat-input-wrapper">
                         <input type="text" id="aiChatInput" placeholder="Ask anything"
                             onkeypress="if(event.key === 'Enter') sendAiMessage()">
@@ -2355,7 +2425,10 @@
                 pkg_growth: "Growth",
                 pkg_elite: "Elite",
                 most_popular: "MOST POPULAR",
-                btn_select: "Select"
+                btn_select: "Select",
+                label_select_path: "SELECT YOUR PATH",
+                label_your_progress: "YOUR PROGRESS",
+                label_current_module: "CURRENT MODULE"
             },
             sl: {
                 logout: "Odjava",
@@ -2368,7 +2441,10 @@
                 pkg_growth: "Napredni",
                 pkg_elite: "Elite",
                 most_popular: "PRIPOROČANO",
-                btn_select: "Izberi"
+                btn_select: "Izberi",
+                label_select_path: "IZBERI SVOJO POT",
+                label_your_progress: "TVOJ NAPREDEK",
+                label_current_module: "TRENUTNI MODUL"
             },
             sq: { logout: "Dil", hero_title: "Zgjidhni Rrugën Tuaj", hero_desc: "Zgjidhni një aftësi dixhitale moderne për të filluar udhëtimin drejt lirisë financiare.", explore_btn: "Eksploro →", how_it_works: "Si funksionon", choose_package: "Zgjidhni Nivelin", pkg_starter: "Fillestar", pkg_growth: "Rritje", pkg_elite: "Elitë", most_popular: "POPULLORE", btn_select: "Zgjidh" },
             ar: { logout: "تسجيل الخروج", hero_title: "اختر مسارك", hero_desc: "اختر مهارة رقمية حديثة لتبدأ رحلتك نحو الحرية المالية.", explore_btn: "استكشف المسار →", how_it_works: "كيف يعمل", choose_package: "اختر مستواك", pkg_starter: "مبتدئ", pkg_growth: "نمو", pkg_elite: "نخبة", most_popular: "الأكثر شيوعًا", btn_select: "تحديد" },
