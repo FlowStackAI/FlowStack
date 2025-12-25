@@ -519,15 +519,18 @@
             .logo-container {
                 gap: 12px !important;
                 margin-bottom: 20px !important;
+                flex-direction: column;
+                /* Stack mainly if needed, but row usually better for header */
             }
 
             .logo-container img {
-                width: 40px !important;
-                height: 40px !important;
+                width: 50px !important;
+                /* Slightly larger than 40px for visibility */
+                height: 50px !important;
             }
 
             .logo-container span {
-                font-size: 32px !important;
+                font-size: 36px !important;
             }
 
             .subtitle {
@@ -586,6 +589,11 @@
             .modal-content {
                 padding: 25px 15px;
                 width: 95%;
+            }
+
+            /* Prevent input zoom on mobile */
+            input {
+                font-size: 16px !important;
             }
         }
 
