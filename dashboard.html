@@ -367,7 +367,7 @@
 
         @media (max-width: 640px) {
             .main-wrapper {
-                padding: 80px 12px 12px;
+                padding: 100px 12px 12px;
                 /* Increased top padding for header */
             }
 
@@ -445,8 +445,8 @@
             }
 
             .chat-view-container {
-                height: calc(100vh - 80px);
-                /* Adjust height for mobile header */
+                height: calc(100vh - 120px);
+                /* Adjust height for mobile header + new padding */
                 display: flex;
                 flex-direction: column;
             }
@@ -461,8 +461,6 @@
             }
 
             .chat-input-wrapper input {
-                font-size: 0.9rem;
-                /* Fallback */
                 font-size: 16px !important;
                 /* Prevent auto-zoom on iOS */
             }
@@ -589,6 +587,10 @@
             }
 
             /* Prevent input zoom */
+            input[type="text"],
+            input[type="password"],
+            input[type="email"],
+            input[type="search"],
             input,
             select,
             textarea {
