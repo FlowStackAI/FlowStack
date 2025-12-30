@@ -1201,8 +1201,8 @@
         }
 
         .send-btn-circle {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: var(--accent-gradient);
             color: white;
             border-radius: 50%;
@@ -1211,12 +1211,23 @@
             justify-content: center;
             border: none;
             cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(74, 108, 247, 0.25);
+            flex-shrink: 0;
+            margin-left: 4px;
         }
 
         .send-btn-circle:hover {
             transform: scale(1.05);
-            filter: brightness(1.1);
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.4);
+        }
+
+        .send-btn-circle:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn-circle i {
+            font-size: 0.9rem;
         }
 
         /* Chat Messages Container */
