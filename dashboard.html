@@ -1440,6 +1440,116 @@
             border-color: transparent;
         }
 
+        /* Chat Sidebar Styles */
+        .chat-sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            background: #f8fafc;
+            border-right: 1px solid var(--border-color);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sidebar.open {
+            transform: translateX(0);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-sidebar-header {
+            padding: 20px;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .chat-history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 12px 20px;
+        }
+
+        .history-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin: 16px 8px 8px;
+            text-transform: uppercase;
+        }
+
+        .history-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-item i {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .history-item:hover {
+            background: #e2e8f0;
+        }
+
+        .history-item.active {
+            background: #eff6ff;
+            /* Light blue bg */
+            color: var(--primary-color);
+        }
+
+        .history-item.active i {
+            color: var(--primary-color);
+        }
+
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .sidebar-toggle-btn:hover {
+            color: var(--text-main);
+        }
+
         /* AI Model Selection Modal */
         .model-modal-overlay {
             display: none;
@@ -1890,10 +2000,40 @@
         <!-- AI Chat View -->
         <div id="view-ai-chat" style="display: none; height: 100%;">
             <div class="chat-view-container">
+                <!-- Chat History Sidebar -->
+                <div class="chat-sidebar" id="chatSidebar">
+                    <div class="chat-sidebar-header">
+                        <button class="new-chat-btn" onclick="startNewChat()">
+                            <i class="fas fa-plus"></i> New Chat
+                        </button>
+                    </div>
+                    <div class="chat-history-list">
+                        <div class="history-label">Today</div>
+                        <div class="history-item active">
+                            <i class="far fa-comment"></i>
+                            <span>Marketing Strategy</span>
+                        </div>
+                        <div class="history-item">
+                            <i class="far fa-comment"></i>
+                            <span>Blog Post Ideas</span>
+                        </div>
+                        <div class="history-label">Yesterday</div>
+                        <div class="history-item">
+                            <i class="far fa-comment"></i>
+                            <span>Email Campaign</span>
+                        </div>
+                    </div>
+                </div>
+
                 <header class="chat-view-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-robot" style="color: var(--primary-color);"></i>
-                        <h2>AI chat</h2>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <button class="sidebar-toggle-btn" onclick="toggleChatSidebar()">
+                            <i class="fas fa-bars"></i> <!-- or fa-history -->
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-robot" style="color: var(--primary-color);"></i>
+                            <h2>AI chat</h2>
+                        </div>
                     </div>
                 </header>
 
@@ -2307,6 +2447,19 @@
                 input.value = text;
                 input.focus();
             }
+        }
+
+        function toggleChatSidebar() {
+            const sidebar = document.getElementById('chatSidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+            }
+        }
+
+        function startNewChat() {
+            // Logic to clear chat or start new session
+            alert("Starting new chat...");
+            // Optionally close sidebar on mobile if needed
         }
 
         function toggleSidebar() {
