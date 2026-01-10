@@ -2659,7 +2659,7 @@
                 let response;
                 if (selectedModel === 'DeepSeek') {
                     response = await getDeepSeekResponse(message);
-                } else if (selectedModel === 'Gemini' && typeof google !== 'undefined') { // Only try Gemini if SDK loaded
+                } else if (selectedModel === 'Gemini') {
                     response = await getGeminiResponse(message);
                 } else {
                     // For now, other models are not implemented with real APIs
