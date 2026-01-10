@@ -20,7 +20,7 @@ serve(async (req: Request) => {
         const apiKey = Deno.env.get('DEEPSEEK_API_KEY')
 
         if (!apiKey) {
-            throw new Error('DeepSeek API Missing')
+            throw new Error('DEEPSEEK_API_KEY is not set in Supabase Secrets.')
         }
 
         const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -39,6 +39,11 @@ serve(async (req: Request) => {
             })
         })
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`DeepSeek API Error (${response.status}): ${errorText}`);
+        }
+
         const data = await response.json()
         const aiText = data.choices[0].message.content
 
@@ -47,8 +52,9 @@ serve(async (req: Request) => {
         })
 
     } catch (error: any) {
+        // Return 200 so the client receives the error message body instead of a generic 400/500
         return new Response(JSON.stringify({ error: error.message || 'Unknown error' }), {
-            status: 400,
+            status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
     }
